@@ -82,11 +82,14 @@ class WD:
 		lc = pc_href
 		self.Get_HTML(pc_href)
 		soup = BS(self.page_source, features='html5lib')
-		paginator =soup.find('a',{'class':'next page-numbers'})['href']
-		lc_last_page_number = sx(''.join(reversed(paginator)), '/', '/')
-		print(paginator, '    => ', lc_last_page_number)
-		for number in range(1,int(lc_last_page_number)+1):
-			append_if_not_exists(f'{pc_href}page/{number}/', ll)
+		try:
+			paginator =soup.find('a',{'class':'next page-numbers'})['href']
+			lc_last_page_number = sx(''.join(reversed(paginator)), '/', '/')
+			print(paginator, '    => ', lc_last_page_number)
+			for number in range(1,int(lc_last_page_number)+1):
+				append_if_not_exists(f'{pc_href}page/{number}/', ll)
+		except:
+			ll = [pc_href]
 		return ll
 
 		

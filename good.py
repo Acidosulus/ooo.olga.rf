@@ -29,8 +29,12 @@ class Good:
 		ol.Get_HTML(pc_good_link)
 		soup = BS(ol.page_source, features='html5lib')
 		self.name = soup.find('h1').text.strip()
-		
-		self.article = soup.find('div',{'class':'product_meta'}).find('span',{'class':'sku_wrapper'}).find('span',{'class':'sku'}).text.strip()
+
+
+		ol.Write_To_File('source.html')
+		self.article = soup.find('div',{'class':'product_meta'})
+		self.article = self.article.find('span',{'class':'sku_wrapper'})
+		self.article = self.article.find('span',{'class':'sku'}).text.strip()
 		
 		for i in range(ol.page_source.count('data-large_image="')):
 			append_if_not_exists(sx(ol.page_source,'data-large_image="','"',i+1), self.pictures)
@@ -47,11 +51,13 @@ class Good:
 		if sizes!=None:
 			sizes=sizes.find_all('option')
 			for size in sizes:
+				print(size.text)
 				lc_size = size.text
 				if lc_size!='Выбрать опцию':
 					append_if_not_exists(lc_size, self.sizes)
 		else:
 			self.sizes=['*']
+
 
 		colors = soup.find('select',{'id':'pa_color'})
 		if colors!=None:
@@ -60,8 +66,11 @@ class Good:
 				lc_color = color.text
 				if lc_color!='Выбрать опцию':
 					append_if_not_exists(lc_color, self.colors)
-
-		self.description = soup.find('div',{'class':'woocommerce-Tabs-panel woocommerce-Tabs-panel--description panel entry-content wc-tab'}).text.strip()
+		try:
+			self.description = soup.find('div',{'class':'woocommerce-Tabs-panel woocommerce-Tabs-panel--description panel entry-content wc-tab'}).text.strip()
+		except:
+			try: self.description = soup.find('div',{'class':'woocommerce-product-attributes-item woocommerce-product-attributes-item--attribute_pa_rost'}).text.strip()
+			except: self.description = ''
 
 		if not '–' in self.price:
 			for size in self.sizes:

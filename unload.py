@@ -32,14 +32,26 @@ colorama.init()
 
 if sys.argv[1] == 'good':
     wd = Login()
-    print(sys.argv[1], sys.argv[2])
+    links_list = [sys.argv[2]]
+    print('Список товаров:', links_list)
+    ln_total = len(links_list)
+    ln_counter = 0
     price = Price(sys.argv[3])
-    for link in [sys.argv[2]]:
-        lo_good = unload_one_good(wd, link, sys.argv[3])
-        lc_name = lo_good.name if lo_good.name.count(lo_good.article) != 0 else lo_good.article + ' ' + lo_good.name
-        if lo_good.sizes==['*'] and (lo_good.colors==['*'] or len(lo_good.colors)==0):
-            print(f'{Fore.LIGHTRED_EX}Товар не имеет ни размеров ни цветов - ПРОПУСК{Fore.RESET}')
+    for link in links_list:
+        ln_counter = ln_counter + 1
+        print('Товар: ', link, Fore.LIGHTWHITE_EX, ln_counter, '/', ln_total, Fore.RESET)
+        if is_price_have_link(sys.argv[3], link):
+            print('Товар уже имеется в прайсе')
             continue
+#        try:
+        lo_good = unload_one_good(wd, link, sys.argv[3])
+#        except:
+#            echo(style('Ошибка загрузки товара',bg='bright_red'))
+#            continue
+        if lo_good.sizes==['*'] and (lo_good.colors==['*'] or len(lo_good.colors)==0):
+            #print(f'{Fore.LIGHTRED_EX}Товар не имеет ни размеров ни цветов - ПРОПУСК{Fore.RESET}')
+            continue
+        lc_name = lo_good.name if lo_good.name.count(lo_good.article) != 0 else lo_good.article + ' ' + lo_good.name
         ll_unique = list(set(lo_good.prices))
         print('Уникальные цены: ', ll_unique)
         if len(lo_good.prices) != len(lo_good.sizes):
@@ -85,9 +97,9 @@ if sys.argv[1] == 'catalog':
 #        except:
 #            echo(style('Ошибка загрузки товара',bg='bright_red'))
 #            continue
-        if lo_good.sizes==['*'] and (lo_good.colors==['*'] or len(lo_good.colors)==0):
-            print(f'{Fore.LIGHTRED_EX}Товар не имеет ни размеров ни цветов - ПРОПУСК{Fore.RESET}')
-            continue
+        #if lo_good.sizes==['*'] and (lo_good.colors==['*'] or len(lo_good.colors)==0):
+        #    print(f'{Fore.LIGHTRED_EX}Товар не имеет ни размеров ни цветов - ПРОПУСК{Fore.RESET}')
+        #    continue
         lc_name = lo_good.name if lo_good.name.count(lo_good.article) != 0 else lo_good.article + ' ' + lo_good.name
         ll_unique = list(set(lo_good.prices))
         print('Уникальные цены: ', ll_unique)
@@ -115,12 +127,13 @@ if sys.argv[1] == 'catalog':
                                 prepare_for_csv_list(ll_sizes),
                                 prepare_for_csv_list(lo_good.colors))
             price.write_to_csv(sys.argv[3])
+    reverse_csv_price(sys.argv[3])
+    convert_file_to_ansi(sys.argv[3] + '_reversed.csv')
+#if sys.argv[1] == 'reverse':
+#    reverse_csv_price(sys.argv[2])
 
-if sys.argv[1] == 'reverse':
-    reverse_csv_price(sys.argv[2])
-
-if sys.argv[1] == 'ansi':
-    convert_file_to_ansi(sys.argv[2] + '_reversed.csv')
+#if sys.argv[1] == 'ansi':
+#    convert_file_to_ansi(sys.argv[2] + '_reversed.csv')
 
 try: wd.driver.quit()
 except: pass
